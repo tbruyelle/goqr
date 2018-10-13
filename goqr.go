@@ -187,7 +187,7 @@ type Qrcode struct {
 	Level          ECLevel // error correction Level (0:auto)
 	mode           string  //
 	module         [][]int // 2-D matrix [row][col] ( +-1 : data, +-2 : pattern )
-	data           string  // data to encode
+	Data           string  // data to encode
 	ModuleSize     int     // module size (default 1)
 	QuietZoneWidth int     // quiet zone width
 	encodedData    []byte  // encoded data
@@ -197,7 +197,7 @@ type Qrcode struct {
 func Encode(data string, version int, level ECLevel) (image.Image, error) {
 
 	qr := new(Qrcode)
-	qr.data = data
+	qr.Data = data
 	qr.Version = version
 	qr.Level = level
 	qr.ModuleSize = 1
@@ -347,7 +347,7 @@ func (qr *Qrcode) totalDataCodeBits() int {
 
 func (qr *Qrcode) selectMode() {
 	qr.mode = "numeric"
-	for _, c := range qr.data {
+	for _, c := range qr.Data {
 		if c >= '0' && c <= '9' {
 			continue
 		}
@@ -374,7 +374,7 @@ func (qr *Qrcode) selectVersionLevel() {
 
 	for i := firstVer; i <= lastVer; i++ {
 		for _, j := range errorCorrectionLevel {
-			if maxDataSize(i, j, qr.mode) >= len(qr.data) {
+			if maxDataSize(i, j, qr.mode) >= len(qr.Data) {
 				qr.Version, qr.Level = i, j
 				return
 			}
@@ -678,15 +678,15 @@ func (qr *Qrcode) encodeNumeric() []byte {
 	// character count indicator
 	switch {
 	case qr.Version <= 9:
-		bitbuf.append(len(qr.data), 10)
+		bitbuf.append(len(qr.Data), 10)
 	case qr.Version <= 26:
-		bitbuf.append(len(qr.data), 12)
+		bitbuf.append(len(qr.Data), 12)
 	default:
-		bitbuf.append(len(qr.data), 14)
+		bitbuf.append(len(qr.Data), 14)
 	}
 
 	// string to bitstream
-	bytebuf := bytes.NewBufferString(qr.data)
+	bytebuf := bytes.NewBufferString(qr.Data)
 	for b := bytebuf.Next(3); len(b) > 0; b = bytebuf.Next(3) {
 		switch len(b) {
 		case 2:
@@ -722,15 +722,15 @@ func (qr *Qrcode) encodeAlphanum() []byte {
 	// character count indicator
 	switch {
 	case qr.Version <= 9:
-		bitbuf.append(len(qr.data), 9)
+		bitbuf.append(len(qr.Data), 9)
 	case qr.Version <= 26:
-		bitbuf.append(len(qr.data), 11)
+		bitbuf.append(len(qr.Data), 11)
 	default:
-		bitbuf.append(len(qr.data), 13)
+		bitbuf.append(len(qr.Data), 13)
 	}
 
 	// string to bitstream
-	bytebuf := bytes.NewBufferString(qr.data)
+	bytebuf := bytes.NewBufferString(qr.Data)
 	for b := bytebuf.Next(2); len(b) > 0; b = bytebuf.Next(2) {
 		switch len(b) {
 		case 1:
@@ -760,15 +760,15 @@ func (qr *Qrcode) encodeByte() []byte {
 	// character count indicator
 	switch {
 	case qr.Version <= 9:
-		bitbuf.append(len(qr.data), 8)
+		bitbuf.append(len(qr.Data), 8)
 	case qr.Version <= 26:
-		bitbuf.append(len(qr.data), 16)
+		bitbuf.append(len(qr.Data), 16)
 	default:
-		bitbuf.append(len(qr.data), 16)
+		bitbuf.append(len(qr.Data), 16)
 	}
 
 	// string to bitstream
-	bytebuf := bytes.NewBufferString(qr.data)
+	bytebuf := bytes.NewBufferString(qr.Data)
 	for c, e := bytebuf.ReadByte(); e == nil; c, e = bytebuf.ReadByte() {
 		bitbuf.appendByte(c)
 	}
